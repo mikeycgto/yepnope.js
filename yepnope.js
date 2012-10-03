@@ -31,6 +31,7 @@ var docElement            = doc.documentElement,
     // Thanks to @jdalton for showing us this opera detection (by way of @kangax) (and probably @miketaylr too, or whatever...)
     isOpera               = window.opera && toString.call( window.opera ) == "[object Opera]",
     isIE                  = !! doc.attachEvent && !isOpera,
+    isOldWebkit           = ( 'webkitAppearance' in docElement.style ) && !( 'async' in doc.createElement('script') ),
     strJsElem             = isGecko ? "object" : isIE  ? "script" : "img",
     strCssElem            = isIE ? "script" : strJsElem,
     isArray               = Array.isArray || function ( obj ) {
@@ -246,6 +247,12 @@ var docElement            = doc.documentElement,
     // inject the element into the stack depending on if it's
     // in the middle of other scripts or not
     execStack.splice( splicePoint, 0, stackObject );
+
+    // Image onload will not get called if file is cached
+    if ( isOldWebkit ) {
+        if ( firstFlag || scriptCache[ url ] === 2)
+            return sTimeout( onload, 100 );
+    }
 
     // The only place these can't go is in the <head> element, since objects won't load in there
     // so we have two options - insert before the head element (which is hard to assume) - or
@@ -575,3 +582,4 @@ var docElement            = doc.documentElement,
   window['yepnope']['injectCss'] = injectCss;
 
 })( this, document );
+
